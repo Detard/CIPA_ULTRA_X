@@ -1,0 +1,174 @@
+/* Estilos gerais */
+html, body {
+    height: 100%; /* Garante que a página ocupe toda a altura da tela */
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f4f7f9;
+    /* 'overflow: hidden;' REMOVIDO DAQUI PARA CORRIGIR A ROLAGEM */
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    padding-top: 70px; /* Adiciona um espaço no topo para a barra fixa */
+    box-sizing: border-box; /* Garante que o padding não cause problemas de layout */
+}
+
+.container {
+    flex: 1; /* Faz esta área crescer e ocupar o espaço que sobra */
+    max-width: 700px;
+    width: 100%;
+    padding: 30px 20px 20px 20px;
+    box-sizing: border-box;
+    margin: 0 auto; /* Centraliza */
+    display: flex;
+}
+
+/* Estilos da Barra Superior (Header) */
+.top-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: #183257;
+    padding: 10px 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    z-index: 1000; /* Garante que a barra fique sempre na frente */
+    box-sizing: border-box;
+}
+
+.top-bar-content {
+    max-width: 700px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 40px;
+    box-sizing: border-box;
+}
+
+.card h1 {
+    color: #183257;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.logo-left, .logo-right {
+    height: 40px;
+    max-width: 150px;
+    object-fit: contain;
+}
+
+/* Estilo do Card */
+.card {
+    background-color: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    padding: 30px 40px;
+    box-sizing: border-box;
+    width: 100%;
+    overflow-y: auto; /* Adiciona rolagem interna APENAS se necessário */
+    -webkit-overflow-scrolling: touch; /* Melhora a rolagem de toque no iOS */
+}
+
+.card p {
+    color: #666;
+    text-align: center;
+    margin-bottom: 30px;
+    line-height: 1.5;
+}
+
+/* Estilos do Formulário */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #333;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-sizing: border-box;
+    font-size: 16px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #183257;
+    box-shadow: 0 0 0 2px rgba(24, 50, 87, 0.2);
+}
+
+.form-group input[type="file"] {
+    padding: 5px;
+}
+
+/* Estilo para o campo de unidade fixa */
+.unidade-fixa {
+    background-color: #f4f7f9;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+    color: #333;
+    margin: 0;
+}
+
+/* Estilo do Botão */
+button {
+    width: 100%;
+    padding: 15px;
+    background-color: #183257;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+button:hover {
+    background-color: #122642;
+    transform: translateY(-2px);
+}
+
+button:disabled {
+    background-color: #a0a0a0;
+    cursor: not-allowed;
+}
+
+/* Mensagem de status de envio */
+.status {
+    text-align: center;
+    margin-top: 20px;
+    font-weight: bold;
+}
+
+.status.sucesso {
+    color: #28a745;
+}
+
+.status.erro {
+    color: #dc3545;
+}
+
+/* --- Estilos para Celular --- */
+@media (max-width: 600px) {
+    
+    .card h1 {
+        font-size: 1.5em; /* Tamanho do título para telas menores */
+    }
+
+}
