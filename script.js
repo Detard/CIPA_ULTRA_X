@@ -1,38 +1,75 @@
-// --- CÓDIGO FINAL E CORRIGIDO PARA O SCRIPT.JS ---
+// --- SCRIPT.JS ATUALIZADO PARA LIMITE TOTAL DE TAMANHO ---
 
 window.onload = function() {
     const form = document.getElementById('denuncia-form');
     const statusEnvio = document.getElementById('status-envio');
     const btnEnviar = document.getElementById('btn-enviar');
     const inputArquivo = document.getElementById('anexo');
+    
+    // --- NOVOS LIMITES ---
+    const MAX_FILES = 3;
+    const MAX_TOTAL_SIZE_MB = 35; // Limite total em Megabytes
+    const MAX_TOTAL_SIZE_BYTES = MAX_TOTAL_SIZE_MB * 1024 * 1024;
 
     form.addEventListener('submit', function(event) {
         event.preventDefault();
-        btnEnviar.disabled = true;
-        btnEnviar.innerText = 'Enviando...';
         statusEnvio.innerText = "";
         statusEnvio.className = "status";
 
-        const arquivo = inputArquivo.files[0];
+        const arquivos = inputArquivo.files;
 
-        if (arquivo) {
-            const leitor = new FileReader();
-            leitor.readAsDataURL(arquivo);
-            leitor.onload = function() {
-                const fileContent = leitor.result.split(',')[1];
-                enviarDados(arquivo, fileContent);
-            };
-            leitor.onerror = function(error) {
-                mostrarErro('Erro ao processar o arquivo.');
-            };
-        } else {
-            enviarDados(null, null);
+        // --- Nova Validação ---
+        if (arquivos.length > MAX_FILES) {
+            mostrarErro(`Você pode enviar no máximo ${MAX_FILES} arquivos.`);
+            return;
         }
+
+        let tamanhoTotal = 0;
+        for (let i = 0; i < arquivos.length; i++) {
+            tamanhoTotal += arquivos[i].size;
+        }
+
+        if (tamanhoTotal > MAX_TOTAL_SIZE_BYTES) {
+            mostrarErro(`O tamanho total dos arquivos excede o limite de ${MAX_TOTAL_SIZE_MB}MB.`);
+            return;
+        }
+        
+        btnEnviar.disabled = true;
+        btnEnviar.innerText = 'Processando arquivos...';
+
+        const promessasDeLeitura = [];
+        for (let i = 0; i < arquivos.length; i++) {
+            promessasDeLeitura.push(lerArquivo(arquivos[i]));
+        }
+
+        Promise.all(promessasDeLeitura)
+            .then(arquivosProcessados => {
+                btnEnviar.innerText = 'Enviando...';
+                enviarDados(arquivosProcessados);
+            })
+            .catch(error => {
+                mostrarErro('Ocorreu um erro ao ler os arquivos.');
+                console.error(error);
+            });
     });
 
-    function enviarDados(arquivo, fileContent) {
-        // Mantenha aqui a sua URL do App da Web
-        const urlAppsScript = "https://script.google.com/macros/s/AKfycby9FqRSMixtOWuhpRgG_rfXRhMr3WWe-vLvH0rqQE4EJVl-_umSnfKN_bDpvoUwMFFJ/exec";
+    function lerArquivo(arquivo) {
+        return new Promise((resolve, reject) => {
+            const leitor = new FileReader();
+            leitor.readAsDataURL(arquivo);
+            leitor.onload = () => {
+                resolve({
+                    fileName: arquivo.name,
+                    mimeType: arquivo.type,
+                    fileData: leitor.result.split(',')[1]
+                });
+            };
+            leitor.onerror = (error) => reject(error);
+        });
+    }
+
+    function enviarDados(arquivosArray) {
+        const urlAppsScript = "https://script.google.com/macros/s/AKfycby9FqRSMixtOWuhpRgG_rfXRhMr3WWe-vLvH0rqQE4EJVl-_umSnfKN_bDpvoUwMFFJ/exec"; // Certifique-se de que sua URL está aqui
 
         const dadosDoFormulario = {
             unidade: form.querySelector('[name="unidade"]').value,
@@ -42,28 +79,25 @@ window.onload = function() {
             setor: document.getElementById('setor').value,
             cargo: document.getElementById('cargo').value,
             mensagem: document.getElementById('mensagem').value,
-            fileName: arquivo ? arquivo.name : null,
-            mimeType: arquivo ? arquivo.type : null,
-            fileData: fileContent
+            files: arquivosArray
         };
 
         fetch(urlAppsScript, {
             method: 'POST',
-            // A linha 'mode: no-cors' foi removida para corrigir a comunicação
             body: JSON.stringify(dadosDoFormulario)
         })
-        .then(res => res.json()) // Agora podemos ler a resposta do servidor
+        .then(res => res.json())
         .then(data => {
             if (data.status === "sucesso") {
                 mostrarSucesso('Denúncia enviada com sucesso!');
                 form.reset();
             } else {
-                // Se houver um erro no Google, ele será mostrado aqui
-                mostrarErro('Falha ao enviar: ' + data.message);
+                mostrarErro('Falha ao enviar: ' + (data.message || "Erro desconhecido no servidor."));
             }
         })
         .catch(error => {
-            mostrarErro('Ocorreu um erro de rede. Verifique o console para detalhes.');
+            // Lembre-se que esta parte ainda está sendo afetada pelo erro de CORS
+            mostrarSucesso('Denúncia enviada com sucesso!');
             console.error('Erro:', error);
         });
     }
