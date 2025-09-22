@@ -1,4 +1,4 @@
-// --- SUBSTITUA TODO O SEU SCRIPT.JS POR ESTE ---
+// --- CÓDIGO FINAL E CORRIGIDO PARA O SCRIPT.JS ---
 
 window.onload = function() {
     const form = document.getElementById('denuncia-form');
@@ -8,7 +8,6 @@ window.onload = function() {
 
     form.addEventListener('submit', function(event) {
         event.preventDefault();
-
         btnEnviar.disabled = true;
         btnEnviar.innerText = 'Enviando...';
         statusEnvio.innerText = "";
@@ -16,12 +15,10 @@ window.onload = function() {
 
         const arquivo = inputArquivo.files[0];
 
-        // Se houver um arquivo, converte. Se não, envia sem.
         if (arquivo) {
             const leitor = new FileReader();
             leitor.readAsDataURL(arquivo);
             leitor.onload = function() {
-                // Pega apenas o código base64, sem o "data:image/png;base64,"
                 const fileContent = leitor.result.split(',')[1];
                 enviarDados(arquivo, fileContent);
             };
@@ -29,12 +26,12 @@ window.onload = function() {
                 mostrarErro('Erro ao processar o arquivo.');
             };
         } else {
-            enviarDados(null, null); // Envia o formulário sem arquivo
+            enviarDados(null, null);
         }
     });
 
     function enviarDados(arquivo, fileContent) {
-        // !!! IMPORTANTE: COLE A URL DO SEU APP DA WEB AQUI !!!
+        // Mantenha aqui a sua URL do App da Web
         const urlAppsScript = "https://script.google.com/macros/s/AKfycby9FqRSMixtOWuhpRgG_rfXRhMr3WWe-vLvH0rqQE4EJVl-_umSnfKN_bDpvoUwMFFJ/exec";
 
         const dadosDoFormulario = {
@@ -51,24 +48,24 @@ window.onload = function() {
         };
 
         fetch(urlAppsScript, {
-                method: 'POST',
-                mode: 'no-cors', // Necessário para evitar erro de CORS com Apps Script
-                cache: 'no-cache',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(dadosDoFormulario)
-            })
-            .then(() => {
-                // Com 'no-cors', não conseguimos ler a resposta, mas o envio funciona.
-                // Então, assumimos sucesso e informamos o usuário.
+            method: 'POST',
+            // A linha 'mode: no-cors' foi removida para corrigir a comunicação
+            body: JSON.stringify(dadosDoFormulario)
+        })
+        .then(res => res.json()) // Agora podemos ler a resposta do servidor
+        .then(data => {
+            if (data.status === "sucesso") {
                 mostrarSucesso('Denúncia enviada com sucesso!');
                 form.reset();
-            })
-            .catch(error => {
-                mostrarErro('Ocorreu um erro de rede. Tente novamente.');
-                console.error('Erro:', error);
-            });
+            } else {
+                // Se houver um erro no Google, ele será mostrado aqui
+                mostrarErro('Falha ao enviar: ' + data.message);
+            }
+        })
+        .catch(error => {
+            mostrarErro('Ocorreu um erro de rede. Verifique o console para detalhes.');
+            console.error('Erro:', error);
+        });
     }
 
     function mostrarSucesso(mensagem) {
